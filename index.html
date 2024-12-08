@@ -26,7 +26,7 @@
 <body class="bg-light">
     <div class="container my-5">
         <h1 class="text-center mb-4">Masa's Language Quiz</h1>
-
+        
         <div class="mb-3">
             <label for="week-select" class="form-label">Choose a week:</label>
             <select id="week-select" class="form-select">
@@ -39,6 +39,10 @@
         <div id="quiz-section" class="d-none">
             <button id="play-word" class="btn btn-info mb-3">Play Word</button>
 
+            <div id="image-container" class="mb-3 text-center">
+                <img id="question-image" src="" alt="Question Image" class="img-fluid" style="max-height: 200px; display: none;">
+            </div>
+
             <input type="text" id="user-answer" class="form-control mb-3" placeholder="Type your answer here">
 
             <div id="keyboard"></div>
@@ -47,7 +51,6 @@
             <button id="next-question" class="btn btn-secondary mb-3 d-none">Next Question</button>
 
             <p id="feedback" class="fw-bold"></p>
-
             <p id="progress" class="text-muted"></p>
         </div>
 
@@ -62,14 +65,14 @@
     <script>
         const weeklyWords = {
             1: [
-                { english: "cat", irish: "cat" },
-                { english: "dog", irish: "madra" },
-                { english: "house", irish: "teach" }
+                { english: "cat", irish: "cat", image: "https://via.placeholder.com/150?text=Cat" },
+                { english: "dog", irish: "madra", image: "https://via.placeholder.com/150?text=Dog" },
+                { english: "house", irish: "teach", image: "images/house.jpg" }
             ],
             14: [
-                { english: "apple", irish: "úll" },
-                { english: "bread", irish: "arán" },
-                { english: "water", irish: "uisce" }
+                { english: "apple", irish: "úll", image: "https://via.placeholder.com/150?text=Apple" },
+                { english: "bread", irish: "arán", image: "https://via.placeholder.com/150?text=Bread" },
+                { english: "water", irish: "uisce", image: "https://via.placeholder.com/150?text=Water" }
             ]
         };
 
@@ -87,11 +90,6 @@
         let correctAnswers = [];
         let incorrectAnswers = [];
 
-        const quizSection = document.getElementById("quiz-section");
-        const feedback = document.getElementById("feedback");
-        const progress = document.getElementById("progress");
-        const nextQuestionButton = document.getElementById("next-question");
-
         document.getElementById("start-quiz").addEventListener("click", () => {
             selectedWeek = parseInt(weekSelect.value);
             if (!selectedWeek || !weeklyWords[selectedWeek]) {
@@ -103,7 +101,7 @@
             correctAnswers = [];
             incorrectAnswers = [];
 
-            quizSection.classList.remove("d-none");
+            document.getElementById("quiz-section").classList.remove("d-none");
             document.getElementById("results-section").classList.add("d-none");
             nextQuestion();
         });
@@ -117,6 +115,7 @@
 
         document.getElementById("submit-answer").addEventListener("click", () => {
             const userAnswer = document.getElementById("user-answer").value.trim().toLowerCase();
+            const feedback = document.getElementById("feedback");
 
             if (!currentWord) {
                 feedback.textContent = "Click 'Play Word' to start!";
@@ -135,28 +134,36 @@
             }
 
             document.getElementById("user-answer").value = "";
-            nextQuestionButton.classList.remove("d-none");
+            document.getElementById("next-question").classList.remove("d-none");
         });
 
-        nextQuestionButton.addEventListener("click", () => {
-            nextQuestion();
-            nextQuestionButton.classList.add("d-none");
+        document.getElementById("next-question").addEventListener("click", () => {
+            document.getElementById("next-question").classList.add("d-none");
+            if (remainingWords.length > 0) {
+                nextQuestion();
+            } else {
+                showResults();
+            }
         });
 
         function nextQuestion() {
-            if (remainingWords.length === 0) {
-                showResults();
-                return;
-            }
-
             currentWord = remainingWords.splice(Math.floor(Math.random() * remainingWords.length), 1)[0];
-            feedback.textContent = "";
-            progress.textContent = 
+            document.getElementById("feedback").textContent = "";
+
+            document.getElementById("progress").textContent = 
                 `${correctAnswers.length + incorrectAnswers.length + 1} / ${weeklyWords[selectedWeek].length}`;
+
+            const questionImage = document.getElementById("question-image");
+            if (currentWord.image) {
+                questionImage.src = currentWord.image;
+                questionImage.style.display = "block";
+            } else {
+                questionImage.style.display = "none";
+            }
         }
 
         function showResults() {
-            quizSection.classList.add("d-none");
+            document.getElementById("quiz-section").classList.add("d-none");
             document.getElementById("results-section").classList.remove("d-none");
 
             const total = weeklyWords[selectedWeek].length;
