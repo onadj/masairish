@@ -25,8 +25,8 @@
 </head>
 <body class="bg-light">
     <div class="container my-5">
-        <h1 class="text-center mb-4">Irish Language Quiz</h1>
-        
+        <h1 class="text-center mb-4">Masa's Language Quiz</h1>
+
         <div class="mb-3">
             <label for="week-select" class="form-label">Choose a week:</label>
             <select id="week-select" class="form-select">
@@ -44,6 +44,7 @@
             <div id="keyboard"></div>
 
             <button id="submit-answer" class="btn btn-success mb-3">Submit Answer</button>
+            <button id="next-question" class="btn btn-secondary mb-3 d-none">Next Question</button>
 
             <p id="feedback" class="fw-bold"></p>
 
@@ -59,7 +60,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Riječi za svaki tjedan
         const weeklyWords = {
             1: [
                 { english: "cat", irish: "cat" },
@@ -71,10 +71,8 @@
                 { english: "bread", irish: "arán" },
                 { english: "water", irish: "uisce" }
             ]
-            // Dodaj ostale tjedne ovdje...
         };
 
-        // Generiranje popisa tjedana
         const weekSelect = document.getElementById("week-select");
         for (let i = 1; i <= 30; i++) {
             const option = document.createElement("option");
@@ -89,6 +87,11 @@
         let correctAnswers = [];
         let incorrectAnswers = [];
 
+        const quizSection = document.getElementById("quiz-section");
+        const feedback = document.getElementById("feedback");
+        const progress = document.getElementById("progress");
+        const nextQuestionButton = document.getElementById("next-question");
+
         document.getElementById("start-quiz").addEventListener("click", () => {
             selectedWeek = parseInt(weekSelect.value);
             if (!selectedWeek || !weeklyWords[selectedWeek]) {
@@ -100,7 +103,7 @@
             correctAnswers = [];
             incorrectAnswers = [];
 
-            document.getElementById("quiz-section").classList.remove("d-none");
+            quizSection.classList.remove("d-none");
             document.getElementById("results-section").classList.add("d-none");
             nextQuestion();
         });
@@ -114,10 +117,10 @@
 
         document.getElementById("submit-answer").addEventListener("click", () => {
             const userAnswer = document.getElementById("user-answer").value.trim().toLowerCase();
-            const feedback = document.getElementById("feedback");
 
             if (!currentWord) {
                 feedback.textContent = "Click 'Play Word' to start!";
+                feedback.style.color = "black";
                 return;
             }
 
@@ -132,23 +135,28 @@
             }
 
             document.getElementById("user-answer").value = "";
+            nextQuestionButton.classList.remove("d-none");
+        });
 
-            if (remainingWords.length > 0) {
-                nextQuestion();
-            } else {
-                showResults();
-            }
+        nextQuestionButton.addEventListener("click", () => {
+            nextQuestion();
+            nextQuestionButton.classList.add("d-none");
         });
 
         function nextQuestion() {
+            if (remainingWords.length === 0) {
+                showResults();
+                return;
+            }
+
             currentWord = remainingWords.splice(Math.floor(Math.random() * remainingWords.length), 1)[0];
-            document.getElementById("feedback").textContent = "";
-            document.getElementById("progress").textContent = 
+            feedback.textContent = "";
+            progress.textContent = 
                 `${correctAnswers.length + incorrectAnswers.length + 1} / ${weeklyWords[selectedWeek].length}`;
         }
 
         function showResults() {
-            document.getElementById("quiz-section").classList.add("d-none");
+            quizSection.classList.add("d-none");
             document.getElementById("results-section").classList.remove("d-none");
 
             const total = weeklyWords[selectedWeek].length;
@@ -173,7 +181,6 @@
             });
         }
 
-        // Virtualna tipkovnica
         const keyboard = document.getElementById("keyboard");
         ["á", "é", "í", "ó", "ú"].forEach(char => {
             const button = document.createElement("button");
